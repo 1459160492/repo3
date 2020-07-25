@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="js/getParameter.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>黑马旅游-搜索</title>
+    <link rel="stylesheet" type="text/css" href="css/common.css">
+    <link rel="stylesheet" href="css/search.css">
+    <script src="js/jquery-3.3.1.js"></script>
+
+    <script>
+        $(function () {
+            var cid = getParameter("cid");
+            var serrch = getParameter("serrchKey");
+            if (serrch) {
+                var serrchKey1 = decodeURIComponent(serrch);
+            }
+            load(cid, 5, 1, serrchKey1);
+        })
+
+
+        function load(cid, numberOfOnePage, nowPage, serrchKey1) {
+            $.post("route/findRoute", {cid: cid, numberOfOnePage: numberOfOnePage, nowPage: nowPage,rname:serrchKey1}, function (date) {
+                $("#totalpage").html(date.numberOfPage);
+                $("#totalroute").html(date.allNumberOfFFind);
+                var string = "";
+                for (var i = 0; i < date.listOfRoute.length; i++) {
+                    var msgOfGood = '              <li>\n' +
+                        '                            <div class="img"><img src="' + date.listOfRoute[i].rimage + '" style="width: 299px;"></div>\n' +
+                        '                            <div class="text1">\n' +
+                        '                                <p>' + date.listOfRoute[i].rname + '</p>\n' +
+                        '                                <br/>\n' +
+                        '                                <p>' + date.listOfRoute[i].routeIntroduce + '</p>\n' +
+                        '                            </div>\n' +
+                        '                            <div class="price">\n' +
+                        '                                <p class="price_num">\n' +
+                        '                                    <span>&yen;</span>\n' +
+                        '                                    <span>' + date.listOfRoute[i].price + '</span>\n' +
+                        '                                    <span>起</span>\n' +
+                        '                                </p>\n' +
+                        '                                <p><a href="route_detail.html?rid='+date.listOfRoute[i].rid+'">查看详情</a></p>\n' +
+                        '                            </div>\n' +
+                        '                        </li>';
+                    string += msgOfGood;
+                }
+                $("#route").html(string);
+                var string1 = "";
+                var beforenumber = (nowPage - 1);
+                if (beforenumber == 0) {
+                    beforenumber = 1;
+                }
+
+                var afternumber = (nowPage + 1);
+                if (afternumber == (date.numberOfPage + 1)) {
+                    afternumber = date.numberOfPage;
+                }
+                string1 += '<li class="threeword" onclick="javascript:load(' + cid + ',' + numberOfOnePage + ',' + 1 + ',\''+date.searchKey+'\')"><a>首页</a></li>\n' +
+                    '<li class="threeword" onclick="javascript:load(' + cid + ',' + numberOfOnePage + ',' + beforenumber + ',\''+date.searchKey+'\')"><a >上一页</a></li>';
+                var begin;
+                var end;
+                if (date.numberOfPage < 10) {
+                    begin = 1;
+                    end = date.numberOfPage;
+                } else {
+                    if (nowPage < 5) {
+                        begin = 1;
+                        end = 10;
+                    } else if (nowPage > date.numberOfPage - 5) {
+                        end = date.numberOfPage;
+                        begin = date.numberOfPage - 9;
+                    } else {
+                        begin = nowPage - 4;
+                        end = nowPage + 5;
+                    }
+                }
+                for (var i = begin; i <= end; i++) {
+                    if (i == nowPage) {
+                        var pageSub = '<li class="curPage" onclick="javascript:load(' + cid + ',' + numberOfOnePage + ',' + i + ',\''+date.searchKey+'\')"><a>' + (i) + '</a></li>';
+                    } else {
+                        var pageSub = '<li onclick="javascript:load(' + cid + ',' + numberOfOnePage + ',' + i + ',\''+date.searchKey+'\')"><a>' + i + '</a></li>';
+                    }
+                    string1 += pageSub;
+                }
+                string1 += ' <li class="threeword" onclick="javascript:load(' + cid + ',' + numberOfOnePage + ',' + afternumber + ',\''+date.searchKey+'\')"><a >下一页</a></li>\n' +
+                    '<li class="threeword" onclick="javascript:load(' + cid + ',' + numberOfOnePage + ',' + date.numberOfPage + ',\''+date.searchKey+'\')"><a >末页</a></li>'
+                $("#pageShow").html(string1);
+            })
+        }
+
+    </script>
+</head>
+<body>
+<!--引入头部-->
+<div id="header"></div>
+<div class="page_one">
+    <div class="contant">
+        <div class="crumbs">
+            <img src="images/search.png" alt="">
+            <p>黑马旅行><span>搜索结果</span></p>
+        </div>
+        <div class="xinxi clearfix">
+            <div class="left">
+                <div class="header">
+                    <span>商品信息</span>
+                    <span class="jg">价格</span>
+                </div>
+                <ul id="route">
+                </ul>
+                <div class="page_num_inf">
+                    <i></i> 共
+                    <span id="totalpage">12</span>页<span id="totalroute">132</span>条
+                </div>
+                <div class="pageNum">
+                    <ul id="pageShow">
+
+                    </ul>
+                </div>
+            </div>
+            <div class="right">
+                <div class="top">
+                    <div class="hot">HOT</div>
+                    <span>热门推荐</span>
+                </div>
+                <ul>
+                    <li>
+                        <div class="left"><img src="images/04-search_09.jpg" alt=""></div>
+                        <div class="right">
+                            <p>清远新银盏温泉度假村酒店/自由行套...</p>
+                            <p>网付价<span>&yen;<span>899</span>起</span>
+                            </p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--引入头部-->
+<div id="footer"></div>
+<!--导入布局js，共享header和footer-->
+<script type="text/javascript" src="js/include.js"></script>
+</body>
+
+</html>
